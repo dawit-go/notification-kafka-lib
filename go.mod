@@ -1,4 +1,5 @@
-module github.com/CBE-Super-App/notification-kafka-lib
+module github.com/dawit-go/notification-kafka-lib
+
 
 go 1.24.4
 

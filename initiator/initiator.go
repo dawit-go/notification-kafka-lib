@@ -3,8 +3,8 @@
 package initiator
 
 import (
-	"github.com/CBE-Super-App/notification-kafka-lib/config"
-	producer "github.com/CBE-Super-App/notification-kafka-lib/kafka"
+	"github.com/dawit-go/notification-kafka-lib/config"
+	producer "github.com/dawit-go/notification-kafka-lib/kafka"
 	"gitlab.com/bersufekadgetachew/cbe-super-app-shared/shared/utils"
 )
 

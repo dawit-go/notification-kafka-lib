@@ -10,9 +10,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/CBE-Super-App/notification-kafka-lib/config"
-	"github.com/CBE-Super-App/notification-kafka-lib/dto"
 	"github.com/IBM/sarama"
+	"github.com/dawit-go/notification-kafka-lib/config"
+	"github.com/dawit-go/notification-kafka-lib/dto"
 	"gitlab.com/bersufekadgetachew/cbe-super-app-shared/shared/utils"
 )
 
