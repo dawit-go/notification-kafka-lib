@@ -1,18 +1,15 @@
 module github.com/dawit-go/notification-kafka-lib
 
-
 go 1.24.4
 
 require (
 	github.com/IBM/sarama v1.45.2
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
 	github.com/hashicorp/vault/api v1.20.0
-	github.com/joho/godotenv v1.5.1
 	gitlab.com/bersufekadgetachew/cbe-super-app-shared v0.0.52
 )
 
 require (
-	github.com/CBE-Super-App/cbe-super-app-notification v0.0.0-20250626170150-035258adda6f // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
