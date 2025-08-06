@@ -1,5 +1,3 @@
-// Package producer provides a Kafka notification producer for publishing
-// messages to Kafka topics with support for synchronous delivery confirmation.
 package producer
 
 import (
@@ -81,18 +79,38 @@ func (np *NotificationProducer) Close() {
 
 	np.closed = true
 	if err := np.producer.Close(); err != nil {
-		np.logger.Errorf("Failed to close Kafka producer: %v", err)
+		np.logger.Errorf("Error closing Kafka producer: %v", err)
 	} else {
 		np.logger.Infof("Kafka producer closed successfully")
 	}
 }
 
-// PublishMessage publishes a notification message with the specified msgType and payload
-// to the given Kafka topic. The message is marshaled from a NotificationMessage DTO
+// PublishSMSMessage publishes an SMS message to Kafka
+func (np *NotificationProducer) PublishSMSMessage(ctx context.Context, smsMsg dto.SMSKafkaMessage) error {
+	return np.PublishMessage(ctx, smsMsg, "sms", np.config.SMSTopic, "SMS")
+}
+
+// PublishEmailMessage publishes an email message to Kafka
+func (np *NotificationProducer) PublishEmailMessage(ctx context.Context, emailMsg dto.EmailKafkaMessage) error {
+	return np.PublishMessage(ctx, emailMsg, "email", np.config.EmailTopic, "Email")
+}
+
+// PublishInAppMessage publishes an in-app notification message to Kafka
+func (np *NotificationProducer) PublishInAppMessage(ctx context.Context, inAppMsg dto.InAppKafkaMessage) error {
+	return np.PublishMessage(ctx, inAppMsg, "in_app", np.config.InAppTopic, "In-App Notification")
+}
+
+// PublishPushMessage publishes a push notification message to Kafka
+func (np *NotificationProducer) PublishPushMessage(ctx context.Context, pushMsg dto.PushKafkaMessage) error {
+	return np.PublishMessage(ctx, pushMsg, "push", np.config.PushTopic, "Push Notification")
+}
+
+// PublishMessage publishes a notification message with the specified msgType, payload,
+// topic, and logType to Kafka. The message is marshaled from a NotificationMessage DTO
 // and sent synchronously with delivery confirmation.
 //
 // Returns an error if message creation, marshaling, or sending fails.
-func (np *NotificationProducer) PublishMessage(ctx context.Context, msgType, topic string, payload interface{}) error {
+func (np *NotificationProducer) PublishMessage(ctx context.Context, payload interface{}, msgType, topic, logType string) error {
 	notificationMsg, err := dto.NewNotificationMessage(fmt.Sprintf("%s-%d", msgType, time.Now().UnixNano()), msgType, payload)
 	if err != nil {
 		return fmt.Errorf("failed to create notification message: %w", err)
@@ -113,23 +131,23 @@ func (np *NotificationProducer) PublishMessage(ctx context.Context, msgType, top
 		},
 	}
 
-	return np.produceAndWait(ctx, kafkaMsg, notificationMsg.ID, topic)
+	return np.produceAndWait(ctx, kafkaMsg, notificationMsg.ID, topic, logType)
 }
 
 // produceAndWait sends the Kafka message asynchronously but waits for delivery confirmation,
 // respecting context cancellation or a timeout of 30 seconds.
 //
 // Returns an error if the message fails to send or if the context is cancelled or times out.
-func (np *NotificationProducer) produceAndWait(ctx context.Context, kafkaMsg *sarama.ProducerMessage, messageID, topic string) error {
+func (np *NotificationProducer) produceAndWait(ctx context.Context, kafkaMsg *sarama.ProducerMessage, messageID, topic, logType string) error {
 	done := make(chan error, 1)
 
 	go func() {
 		partition, offset, err := np.safeSendMessage(kafkaMsg)
 		if err != nil {
-			done <- fmt.Errorf("failed to send Kafka message: %w", err)
+			done <- fmt.Errorf("failed to produce message: %w", err)
 			return
 		}
-		np.logger.Infof("Kafka message sent successfully | ID: %s | Topic: %s | Partition: %d | Offset: %d", messageID, topic, partition, offset)
+		np.logger.Infof("%s message published successfully | ID: %s | Topic: %s | Partition: %d | Offset: %d", logType, messageID, topic, partition, offset)
 		done <- nil
 	}()
 

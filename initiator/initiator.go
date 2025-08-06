@@ -4,7 +4,7 @@ package initiator
 
 import (
 	"github.com/dawit-go/notification-kafka-lib/config"
-	producer "github.com/dawit-go/notification-kafka-lib/kafka"
+	producer "github.com/dawit-go/notification-kafka-lib/producer"
 	"gitlab.com/bersufekadgetachew/cbe-super-app-shared/shared/utils"
 )
 
